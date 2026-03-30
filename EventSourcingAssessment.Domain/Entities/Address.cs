@@ -1,8 +1,8 @@
-﻿namespace EventSourcingAssessment.Domain.Models;
+﻿namespace EventSourcingAssessment.Domain.Entities;
 
 public class Address {
     
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
     
     public required string Street { get; set; }
     
@@ -10,5 +10,5 @@ public class Address {
     
     public required string HouseNumber { get; set; }
     
-    public Guid ConsumerId { get; set; }
+    public Guid ConsumerId { get; init; }
 }

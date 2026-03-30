@@ -1,6 +1,6 @@
-﻿using EventSourcingAssessment.Domain.Events;
+﻿using EventSourcingAssessment.Domain.Entities;
+using EventSourcingAssessment.Domain.Events;
 using EventSourcingAssessment.Domain.Interfaces;
-using EventSourcingAssessment.Domain.Models;
 using EventSourcingAssessment.Projectors.Interfaces;
 
 namespace EventSourcingAssessment.Projectors;
@@ -30,11 +30,12 @@ public sealed class ConsumerEventProjector(IEntityRepository<Consumer> consumerR
 
     private async Task Handle(ConsumerCreated eventMessage)
     {
-        var consumer = new Consumer{
+        var consumer = new Consumer
+        {
             Id = eventMessage.Id,
             FirstName = eventMessage.FirstName,
             LastName = eventMessage.LastName,
-            Address = new Address()
+            Address = new Address
             {
                 Id = Guid.NewGuid(),
                 ConsumerId = eventMessage.Id,

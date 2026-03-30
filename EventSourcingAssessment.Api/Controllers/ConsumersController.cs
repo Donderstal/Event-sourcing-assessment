@@ -1,6 +1,6 @@
 ﻿using EventSourcingAssessment.Domain.Commands;
+using EventSourcingAssessment.Domain.Entities;
 using EventSourcingAssessment.Domain.Interfaces;
-using EventSourcingAssessment.Domain.Models;
 using EventSourcingAssessment.Handlers;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,4 +1,5 @@
-﻿using EventSourcingAssessment.Domain.Interfaces;
+﻿using EventSourcingAssessment.Domain.Entities;
+using EventSourcingAssessment.Domain.Interfaces;
 using EventSourcingAssessment.Domain.Models;
 using EventSourcingAssessment.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;

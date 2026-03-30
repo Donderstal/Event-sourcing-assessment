@@ -1,7 +1,7 @@
 <Solution>
   <Folder Name="/SolutionItems/" />
-  <Project Path="EventSourcingAssesment.IntegrationsTests/EventSourcingAssesment.IntegrationsTests.csproj" />
   <Project Path="EventSourcingAssessment.Api/EventSourcingAssessment.Api.csproj" />
   <Project Path="EventSourcingAssessment.Domain/EventSourcingAssessment.Domain.csproj" />
+  <Project Path="EventSourcingAssessment.IntegrationsTests/EventSourcingAssessment.IntegrationsTests.csproj" />
   <Project Path="EventSourcingAssessment.Persistence/EventSourcingAssessment.Persistence.csproj" />
 </Solution>

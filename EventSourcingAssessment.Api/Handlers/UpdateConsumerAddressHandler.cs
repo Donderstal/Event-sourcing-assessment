@@ -19,10 +19,10 @@ public class UpdateConsumerAddressCommandHandler(IStoreEvents storeEvents): ICom
             throw new ArgumentException("Street is required.", nameof(command));
         
         if (string.IsNullOrWhiteSpace(command.Address.PostalCode))
-            throw new ArgumentException("Street is required.", nameof(command));
+            throw new ArgumentException("PostalCode is required.", nameof(command));
         
         if (string.IsNullOrWhiteSpace(command.Address.HouseNumber))
-            throw new ArgumentException("Street is required.", nameof(command));
+            throw new ArgumentException("HouseNumber is required.", nameof(command));
 
         // Build the domain event
         var domainEvent = new ConsumerAddressUpdated(

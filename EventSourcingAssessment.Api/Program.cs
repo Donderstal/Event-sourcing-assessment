@@ -41,4 +41,8 @@ app.MapControllers();
 
 app.Run();
 
-public partial class Program { }
+namespace EventSourcingAssessment
+{
+    // Partial program for our integration tests
+    public partial class Program { }
+}

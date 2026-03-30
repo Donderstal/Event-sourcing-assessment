@@ -11,7 +11,6 @@ public class UpdateConsumerCommandHandler(IStoreEvents storeEvents): ICommandHan
         ArgumentNullException.ThrowIfNull(command);
 
         // Basic validation example
-
         if (string.IsNullOrWhiteSpace(command.FirstName))
             throw new ArgumentException("FirstName is required.", nameof(command));
 

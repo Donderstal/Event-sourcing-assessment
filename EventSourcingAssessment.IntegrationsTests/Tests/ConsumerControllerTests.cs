@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using EventSourcingAssessment.Domain.Commands;
+using EventSourcingAssessment.Domain.Entities;
 using EventSourcingAssessment.Domain.Models;
 
 namespace EventSourcingAssesment.IntegrationsTests.Tests;
