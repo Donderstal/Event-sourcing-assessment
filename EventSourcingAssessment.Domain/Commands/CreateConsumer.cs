@@ -2,4 +2,4 @@
 
 namespace EventSourcingAssessment.Domain.Commands;
 
-public record CreateConsumer(Guid Id, AddressDto Address, string? FirstName, string? LastName);
+public record CreateConsumer(AddressDto Address, string? FirstName, string? LastName);

@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EventSourcingAssessment.Domain.Interfaces;
+using EventSourcingAssessment.Domain.Models;
+using EventSourcingAssessment.Persistence.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NEventStore;
 using NEventStore.Serialization.Json;
@@ -13,6 +16,9 @@ public static class PersistenceServiceCollectionExtensions
         {
             services.AddEventStore();
             services.AddDatabase();
+
+            services.AddScoped<IEntityRepository<Consumer>, EntityRepository<Consumer>>();
+            
             return services;
         }
 
