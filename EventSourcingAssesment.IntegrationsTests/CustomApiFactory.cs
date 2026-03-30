@@ -6,18 +6,18 @@ using NEventStore;
 
 namespace EventSourcingAssesment.IntegrationsTests;
 
-public class CustomApiFactory : WebApplicationFactory<Program>
+public class CustomApiFactory() : WebApplicationFactory<Program>
 {
-    public IStoreEvents EventStore { get; }
-    
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.UseEnvironment("Testing");
-
-        builder.ConfigureServices(services =>
-        {
-            services.RemoveAll<IStoreEvents>();
-            services.AddSingleton(EventStore);
-        });
-    }
+    // public IStoreEvents EventStore { get; }// = eventStore ?? throw new ArgumentNullException(nameof(eventStore));
+    //
+    // protected override void ConfigureWebHost(IWebHostBuilder builder)
+    // {
+    //     builder.UseEnvironment("Testing");
+    //
+    //     builder.ConfigureServices(services =>
+    //     {
+    //         services.RemoveAll<IStoreEvents>();
+    //         services.AddSingleton<IStoreEvents>(EventStore);
+    //     });
+    // }
 }

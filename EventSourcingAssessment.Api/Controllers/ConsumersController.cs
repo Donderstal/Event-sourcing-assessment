@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EventSourcingAssessment.Controllers;
 
 [Route("api/[controller]")]
-public class ConsumerController(
+public class ConsumersController(
     IEntityRepository<Consumer> consumerRepository,
     ICommandHandler<CreateConsumer> createConsumerHandler,
     ICommandHandler<UpdateConsumer> updateConsumerHandler,
@@ -23,22 +23,22 @@ public class ConsumerController(
         return consumer != null ? Ok(consumer) : NotFound();
     }
     
-    [HttpPost("createConsumer")]
-    public async Task<ActionResult> CreateConsumer(CreateConsumer createConsumerCommand)
+    [HttpPost]
+    public async Task<ActionResult> CreateConsumer([FromBody] CreateConsumer createConsumerCommand)
     {
         await createConsumerHandler.Handle(createConsumerCommand);
         return Ok();
     }
     
-    [HttpPut("updateConsumer")]
-    public async Task<ActionResult> UpdateConsumer(UpdateConsumer updateConsumerCommand)
+    [HttpPut]
+    public async Task<ActionResult> UpdateConsumer([FromBody] UpdateConsumer updateConsumerCommand)
     {
         await updateConsumerHandler.Handle(updateConsumerCommand);
         return Ok();
     }
 
-    [HttpPut("updateConsumerAddress")]
-    public async Task<ActionResult> UpdateConsumerAddress(UpdateConsumerAddress updateConsumerAddressCommand)
+    [HttpPut("address")]
+    public async Task<ActionResult> UpdateConsumerAddress([FromBody] UpdateConsumerAddress updateConsumerAddressCommand)
     {
         await updateConsumerAddressHandler.Handle(updateConsumerAddressCommand);
         return Ok();

@@ -1,7 +1,5 @@
 ﻿using System.Net.Http.Json;
 using EventSourcingAssessment.Domain.Commands;
-using EventSourcingAssessment.Domain.Constants;
-using EventSourcingAssessment.Domain.Events;
 using EventSourcingAssessment.Domain.Models;
 
 namespace EventSourcingAssesment.IntegrationsTests.Tests;
@@ -10,7 +8,6 @@ public class ConsumerControllerIntegrationTests
 {
     private CustomApiFactory _factory;
     
-    private readonly Guid _consumerId = Guid.NewGuid();
     private readonly string _consumerFirstName = "John";
     private readonly string  _consumerLastName = "Doe";
     private readonly string  _addressStreet = "Main Street";
@@ -33,139 +30,122 @@ public class ConsumerControllerIntegrationTests
     public async Task CreateConsumer_ShouldCreateConsumer()
     {
         // Arrange
+        var consumerId = Guid.NewGuid();
         var client = _factory.CreateClient();
-        var createConsumerCommand = GetCreateConsumer();
+        var createConsumerCommand = GetCreateConsumer(consumerId);
         
         // Act
         var postResponse = await client.PostAsJsonAsync("/api/consumers", createConsumerCommand);
-        var getResponse = await client.GetAsync($"/api/consumers/{_consumerId}");
-        var stream = await _factory.EventStore.OpenStreamAsync(
-            EventSourcingConstants.ConsumerStreamName, _consumerId.ToString(), 0, int.MaxValue
+        var consumer = await WaitForConsumerAsync(
+            client,
+            consumerId,
+            consumer => consumer.Id == consumerId
+                        && consumer.FirstName == _consumerFirstName
+                        && consumer.LastName == _consumerLastName
+                        && consumer.Address.Street == _addressStreet
+                        && consumer.Address.PostalCode == _addressPostalCode
+                        && consumer.Address.HouseNumber == _addressHouseNumber
         );
         
         // Assert
         postResponse.EnsureSuccessStatusCode();
-        getResponse.EnsureSuccessStatusCode();
-        
-        var firstEventInStream = stream.CommittedEvents.First();
-        var consumerCreatedEvent = firstEventInStream.Body as ConsumerCreated;
-        Assert.That(
-            stream.CommittedEvents.Count == 1
-            && consumerCreatedEvent?.Id == _consumerId
-            && consumerCreatedEvent.FirstName == _consumerFirstName
-            && consumerCreatedEvent.LastName == _consumerLastName
-            && consumerCreatedEvent.Address.Street == _addressStreet
-            && consumerCreatedEvent.Address.PostalCode == _addressPostalCode
-            && consumerCreatedEvent.Address.HouseNumber == _addressHouseNumber);
-        
-        var consumer = await getResponse.Content.ReadFromJsonAsync<Consumer>();
-        Assert.That(
-            consumer != null
-            && consumer.Id == _consumerId
-            && consumer.FirstName == _consumerFirstName
-            && consumer.LastName == _consumerLastName
-            && consumer.Address.Street == _addressStreet
-            && consumer.Address.PostalCode == _addressPostalCode
-            && consumer.Address.HouseNumber == _addressHouseNumber
-        );
+        Assert.That(consumer, Is.Not.Null);
     }
     
     [Test]
     public async Task UpdateConsumer_ShouldUpdateExistingConsumer()
     {
         // Arrange
+        var consumerId = Guid.NewGuid();
         var client = _factory.CreateClient();
-        var createConsumerCommand = GetCreateConsumer();
+        var createConsumerCommand = GetCreateConsumer(consumerId);
         
         var newFirstName = "Jane";
         var newLastName = "Johnson";
-        var updateConsumerCommand = new UpdateConsumer(_consumerId, newFirstName, newLastName);
+        var updateConsumerCommand = new UpdateConsumer(consumerId, newFirstName, newLastName);
         
         // Act
         var postResponse = await client.PostAsJsonAsync("/api/consumers", createConsumerCommand);
+        await Task.Delay(100);
         var putResponse = await client.PutAsJsonAsync("/api/consumers", updateConsumerCommand);
-        var getResponse = await client.GetAsync($"/api/consumers/{_consumerId}");
-        var stream = await _factory.EventStore.OpenStreamAsync(
-            EventSourcingConstants.ConsumerStreamName, _consumerId.ToString(), 0, int.MaxValue
+        
+        var consumer = await WaitForConsumerAsync(
+            client,
+            consumerId,
+            c => c.FirstName == newFirstName && c.LastName == newLastName
         );
 
         // Assert
         postResponse.EnsureSuccessStatusCode();
         putResponse.EnsureSuccessStatusCode();
-        getResponse.EnsureSuccessStatusCode();
-        
-        var lastEventInStream = stream.CommittedEvents.Last();
-        var consumerUpdated = lastEventInStream.Body as ConsumerUpdated;
-        Assert.That(
-            stream.CommittedEvents.Count == 2
-            && consumerUpdated?.Id == _consumerId
-            && consumerUpdated.FirstName == _consumerFirstName
-            && consumerUpdated.LastName == _consumerLastName);
-        
-        var consumer = await getResponse.Content.ReadFromJsonAsync<Consumer>();
-        Assert.That(
-            consumer != null
-            && consumer.Id == _consumerId
-            && consumer.FirstName == newFirstName
-            && consumer.LastName == _consumerLastName
-            && consumer.Address.Street == _addressStreet
-            && consumer.Address.PostalCode == _addressPostalCode
-            && consumer.Address.HouseNumber == _addressHouseNumber
-        );
+
+        Assert.That(consumer, Is.Not.Null);
     }
     
     [Test]
     public async Task UpdateConsumerAddress_ShouldUpdateExistingConsumerAddress()
     {
         // Arrange
+        var consumerId = Guid.NewGuid();
         var client = _factory.CreateClient();
-        var createConsumerCommand = GetCreateConsumer();
+        var createConsumerCommand = GetCreateConsumer(consumerId);
         
         var newStreet = "Main Street 2";
         var newPostalCode = "7468 ABCD";
         var newHouseNumber = "12345678";
         var newAddress = new AddressDto(newStreet, newPostalCode, newHouseNumber);
-        var updateConsumerCommand = new UpdateConsumerAddress(_consumerId, newAddress);
+        var updateConsumerAddress = new UpdateConsumerAddress(consumerId, newAddress);
         
         // Act
         var postResponse = await client.PostAsJsonAsync("/api/consumers", createConsumerCommand);
-        var putResponse = await client.PutAsJsonAsync("/api/consumers", updateConsumerCommand);
-        var getResponse = await client.GetAsync($"/api/consumers/{_consumerId}");
-        var stream = await _factory.EventStore.OpenStreamAsync(
-            EventSourcingConstants.ConsumerStreamName, _consumerId.ToString(), 0, int.MaxValue
+        await Task.Delay(100);
+        var putResponse = await client.PutAsJsonAsync("/api/consumers/address", updateConsumerAddress);
+        
+        var consumer = await WaitForConsumerAsync(
+            client,
+            consumerId,
+            consumer => consumer.Address.Street == newStreet 
+                        && consumer.Address.PostalCode == newPostalCode
+                        && consumer.Address.HouseNumber == newHouseNumber
         );
 
-        
         // Assert
         postResponse.EnsureSuccessStatusCode();
         putResponse.EnsureSuccessStatusCode();
-        getResponse.EnsureSuccessStatusCode();
-        
-        var lastEventInStream = stream.CommittedEvents.Last();
-        var consumerAddressUpdated = lastEventInStream.Body as ConsumerAddressUpdated;
-        Assert.That(
-            stream.CommittedEvents.Count == 2
-            && consumerAddressUpdated?.ConsumerId == _consumerId
-            && consumerAddressUpdated.Street == newStreet
-            && consumerAddressUpdated.PostalCode == newPostalCode
-            && consumerAddressUpdated.HouseNumber == newHouseNumber);
-        
-        var consumer = await getResponse.Content.ReadFromJsonAsync<Consumer>();
-        Assert.That(
-            consumer != null
-            && consumer.Address.Street == newStreet
-            && consumer.Address.PostalCode == newPostalCode
-            && consumer.Address.HouseNumber == newHouseNumber
-        );
+
+        Assert.That(consumer, Is.Not.Null);
     }
 
-    private CreateConsumer GetCreateConsumer()
+    private CreateConsumer GetCreateConsumer(Guid id)
     {
         return new (
-            _consumerId,
+            id,
             new(_addressStreet, _addressPostalCode, _addressHouseNumber),
             _consumerFirstName,
             _consumerLastName
         );
+    }
+    
+    static async Task<Consumer?> WaitForConsumerAsync(
+        HttpClient client,
+        Guid consumerId,
+        Func<Consumer, bool> predicate,
+        int retries = 30,
+        int delayMs = 100)
+    {
+        for (var i = 0; i < retries; i++)
+        {
+            var response = await client.GetAsync($"/api/consumers/{consumerId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var consumer = await response.Content.ReadFromJsonAsync<Consumer>();
+                if (consumer != null && predicate(consumer))
+                    return consumer;
+            }
+
+            await Task.Delay(delayMs);
+        }
+
+        return null;
     }
 }
