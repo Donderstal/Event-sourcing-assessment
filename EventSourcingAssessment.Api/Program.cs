@@ -1,9 +1,18 @@
+using EventSourcingAssessment.Domain.Commands;
+using EventSourcingAssessment.Handlers;
 using EventSourcingAssessment.Persistence;
+using EventSourcingAssessment.Projections;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddPersistenceServices();
+builder.Services.AddHostedService<ConsumerProjection>();
+
+// Command handlers
+builder.Services.AddScoped<ICommandHandler<CreateConsumer>, CreateConsumerCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<UpdateConsumer>, UpdateConsumerCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<UpdateConsumerAddress>, UpdateConsumerAddressCommandHandler>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
