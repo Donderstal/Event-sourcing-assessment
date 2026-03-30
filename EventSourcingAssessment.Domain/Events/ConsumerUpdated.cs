@@ -1,3 +1,3 @@
 ﻿namespace EventSourcingAssessment.Domain.Events;
 
-public class ConsumerUpdated(Guid Id, string FirstName, string LastNames);
+public record ConsumerUpdated(Guid Id, string FirstName, string LastName);

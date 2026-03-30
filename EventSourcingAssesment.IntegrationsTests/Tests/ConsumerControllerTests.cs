@@ -1,5 +1,7 @@
 ﻿using System.Net.Http.Json;
 using EventSourcingAssessment.Domain.Commands;
+using EventSourcingAssessment.Domain.Constants;
+using EventSourcingAssessment.Domain.Events;
 using EventSourcingAssessment.Domain.Models;
 
 namespace EventSourcingAssesment.IntegrationsTests.Tests;
@@ -37,10 +39,25 @@ public class ConsumerControllerIntegrationTests
         // Act
         var postResponse = await client.PostAsJsonAsync("/api/consumers", createConsumerCommand);
         var getResponse = await client.GetAsync($"/api/consumers/{_consumerId}");
+        var stream = await _factory.EventStore.OpenStreamAsync(
+            EventSourcingConstants.ConsumerStreamName, _consumerId.ToString(), 0, int.MaxValue
+        );
         
         // Assert
         postResponse.EnsureSuccessStatusCode();
         getResponse.EnsureSuccessStatusCode();
+        
+        var firstEventInStream = stream.CommittedEvents.First();
+        var consumerCreatedEvent = firstEventInStream.Body as ConsumerCreated;
+        Assert.That(
+            stream.CommittedEvents.Count == 1
+            && consumerCreatedEvent?.Id == _consumerId
+            && consumerCreatedEvent.FirstName == _consumerFirstName
+            && consumerCreatedEvent.LastName == _consumerLastName
+            && consumerCreatedEvent.Address.Street == _addressStreet
+            && consumerCreatedEvent.Address.PostalCode == _addressPostalCode
+            && consumerCreatedEvent.Address.HouseNumber == _addressHouseNumber);
+        
         var consumer = await getResponse.Content.ReadFromJsonAsync<Consumer>();
         Assert.That(
             consumer != null
@@ -68,11 +85,23 @@ public class ConsumerControllerIntegrationTests
         var postResponse = await client.PostAsJsonAsync("/api/consumers", createConsumerCommand);
         var putResponse = await client.PutAsJsonAsync("/api/consumers", updateConsumerCommand);
         var getResponse = await client.GetAsync($"/api/consumers/{_consumerId}");
-        
+        var stream = await _factory.EventStore.OpenStreamAsync(
+            EventSourcingConstants.ConsumerStreamName, _consumerId.ToString(), 0, int.MaxValue
+        );
+
         // Assert
         postResponse.EnsureSuccessStatusCode();
         putResponse.EnsureSuccessStatusCode();
         getResponse.EnsureSuccessStatusCode();
+        
+        var lastEventInStream = stream.CommittedEvents.Last();
+        var consumerUpdated = lastEventInStream.Body as ConsumerUpdated;
+        Assert.That(
+            stream.CommittedEvents.Count == 2
+            && consumerUpdated?.Id == _consumerId
+            && consumerUpdated.FirstName == _consumerFirstName
+            && consumerUpdated.LastName == _consumerLastName);
+        
         var consumer = await getResponse.Content.ReadFromJsonAsync<Consumer>();
         Assert.That(
             consumer != null
@@ -102,11 +131,25 @@ public class ConsumerControllerIntegrationTests
         var postResponse = await client.PostAsJsonAsync("/api/consumers", createConsumerCommand);
         var putResponse = await client.PutAsJsonAsync("/api/consumers", updateConsumerCommand);
         var getResponse = await client.GetAsync($"/api/consumers/{_consumerId}");
+        var stream = await _factory.EventStore.OpenStreamAsync(
+            EventSourcingConstants.ConsumerStreamName, _consumerId.ToString(), 0, int.MaxValue
+        );
+
         
         // Assert
         postResponse.EnsureSuccessStatusCode();
         putResponse.EnsureSuccessStatusCode();
         getResponse.EnsureSuccessStatusCode();
+        
+        var lastEventInStream = stream.CommittedEvents.Last();
+        var consumerAddressUpdated = lastEventInStream.Body as ConsumerAddressUpdated;
+        Assert.That(
+            stream.CommittedEvents.Count == 2
+            && consumerAddressUpdated?.ConsumerId == _consumerId
+            && consumerAddressUpdated.Street == newStreet
+            && consumerAddressUpdated.PostalCode == newPostalCode
+            && consumerAddressUpdated.HouseNumber == newHouseNumber);
+        
         var consumer = await getResponse.Content.ReadFromJsonAsync<Consumer>();
         Assert.That(
             consumer != null
