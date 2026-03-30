@@ -2,12 +2,15 @@ using EventSourcingAssessment.Domain.Commands;
 using EventSourcingAssessment.Handlers;
 using EventSourcingAssessment.Persistence;
 using EventSourcingAssessment.Projections;
+using EventSourcingAssessment.Projectors;
+using EventSourcingAssessment.Projectors.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddPersistenceServices();
 builder.Services.AddHostedService<ConsumerProjection>();
+builder.Services.AddScoped<IConsumerEventProjector, ConsumerEventProjector>();
 
 // Command handlers
 builder.Services.AddScoped<ICommandHandler<CreateConsumer>, CreateConsumerCommandHandler>();
